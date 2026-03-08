@@ -1,5 +1,5 @@
+import Link from "next/link";
 import { AgentActionPanel } from "../components/AgentActionPanel";
-import SubscriptionDemoPanel from "../components/SubscriptionDemoPanel";
 
 export default function Home() {
   return (
@@ -16,18 +16,18 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3 sm:justify-end w-full sm:w-auto">
-            <a
-              href="#demo"
+            <Link
+              href="/dashboard"
               className="w-full sm:w-auto text-center rounded-full border border-[#fb7232]/30 bg-white px-4 py-2 text-sm font-semibold text-[#c75829] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
             >
-              Dashboard Demo
-            </a>
-            <a
-              href="mailto:chirag@bidx.ai"
+              Dashboard
+            </Link>
+            <Link
+              href="/login"
               className="w-full sm:w-auto text-center rounded-full bg-[#fb7232] px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e06225] hover:shadow-md"
             >
-              Contact
-            </a>
+              Login
+            </Link>
           </div>
         </header>
         {/* Hero Section */}
@@ -43,18 +43,18 @@ export default function Home() {
               SubscriFlow empowers support and finance teams to view, update, refund, and cancel subscriptions—all in one elegant dashboard. Reduce manual effort, resolve issues faster, and improve customer satisfaction.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:flex-wrap sm:gap-4 w-full">
-              <a
+              <Link
                 href="#features"
                 className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg bg-[#fb7232] px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-[#e06225] hover:shadow-md"
               >
                 Explore features
-              </a>
-              <a
-                href="#demo"
+              </Link>
+              <Link
+                href="/dashboard"
                 className="inline-flex w-full sm:w-auto items-center justify-center rounded-lg border border-[#fb7232]/30 bg-white px-5 py-3 text-sm font-semibold text-[#c75829] shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
               >
-                Live subscription demo
-              </a>
+                Go to dashboard
+              </Link>
             </div>
           </div>
 
@@ -93,19 +93,18 @@ export default function Home() {
             </div>
           </div>
         </section>
-        {/* Demo Panel (Client-side Interactive Island) */}
-        <section className="rounded-2xl border border-[#fb7232]/20 bg-white/80 px-6 py-8 shadow-sm sm:px-10" id="demo">
+        {/* Client instruction panel */}
+        <section className="rounded-2xl border border-[#fb7232]/20 bg-white/80 px-6 py-8 shadow-sm sm:px-10 my-10">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            {/* Demo Description */}
             <div className="space-y-2 max-w-xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#fb7232]">Live Demo</p>
-              <h3 className="text-xl font-bold text-[#341404]">Subscription Explorer</h3>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#fb7232]">Agent note</p>
+              <h3 className="text-xl font-bold text-[#341404]">Keep a quick instruction handy</h3>
               <p className="text-sm text-[#6a3515]">
-                Search, filter, and take instant actions on your active subscriptions. (Mock data powered for demo—backend wiring in a snap.)
+                Use this client-side panel to stash a note for future agent runs. It shows how to add interactive islands without converting the whole page to a client component.
               </p>
             </div>
             <div className="w-full max-w-xl">
-              <SubscriptionDemoPanel />
+              <AgentActionPanel />
             </div>
           </div>
         </section>
@@ -125,15 +124,15 @@ export default function Home() {
             <div className="grid gap-4 rounded-xl border border-[#fb7232]/20 bg-white/80 p-6 text-sm shadow-sm sm:grid-cols-2">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#c75829]">Product</p>
-                <a className="block text-[#5a2a12] transition hover:text-[#fb7232]" href="#features">
+                <Link className="block text-[#5a2a12] transition hover:text-[#fb7232]" href="#features">
                   Features
-                </a>
-                <a className="block text-[#5a2a12] transition hover:text-[#fb7232]" href="#demo">
-                  Demo
-                </a>
-                <a className="block text-[#5a2a12] transition hover:text-[#fb7232]" href="mailto:chirag@bidx.ai">
-                  Contact
-                </a>
+                </Link>
+                <Link className="block text-[#5a2a12] transition hover:text-[#fb7232]" href="/dashboard">
+                  Dashboard
+                </Link>
+                <Link className="block text-[#5a2a12] transition hover:text-[#fb7232]" href="/login">
+                  Login
+                </Link>
               </div>
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[#c75829]">Resources</p>
