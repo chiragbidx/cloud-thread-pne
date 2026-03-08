@@ -45,25 +45,36 @@ export async function createSubscription(subscription: {
     throw new Error("All fields are required.");
   }
 
-  // Prevent duplicate by email+plan+status
+  // Prevent duplicate by email+plan (not status) - match on normalized lowercase email and plan
   const exists = await db
     .select()
     .from(subscriptions)
     .where(
       and(
-        eq(subscriptions.email, subscription.email),
-        eq(subscriptions.plan, subscription.plan),
-        eq(subscriptions.status, subscription.status)
+        eq(subscriptions.email, subscription.email.trim().toLowerCase()),
+        eq(subscriptions.plan, subscription.plan.trim().toLowerCase())
       )
     );
-  if (exists.length > 0) throw new Error("Duplicate subscription record exists.");
+  if (exists.length > 0) throw new Error("A subscription for this user and plan already exists.");
 
-  const [inserted] = await db
-    .insert(subscriptions)
-    .values(subscription)
-    .returning();
+  try {
+    const [inserted] = await db
+      .insert(subscriptions)
+      .values({
+        ...subscription,
+        email: subscription.email.trim().toLowerCase(),
+        plan: subscription.plan.trim().toLowerCase(),
+      })
+      .returning();
 
-  return inserted;
+    return inserted;
+  } catch (err: any) {
+    throw new Error(
+      err?.message && typeof err.message === "string"
+        ? `Database error: ${err.message}`
+        : "Failed to create subscription. Please check input data."
+    );
+  }
 }
 
 /**
@@ -84,11 +95,23 @@ export async function updateSubscription(
   }
 ) {
   if (!id) throw new Error("Subscription ID required.");
-  const [updated] = await db
-    .update(subscriptions)
-    .set(updates)
-    .where(eq(subscriptions.id, id))
-    .returning();
-  if (!updated) throw new Error("Subscription not found.");
-  return updated;
+  try {
+    const normUpdates = { ...updates };
+    if (normUpdates.email) normUpdates.email = normUpdates.email.trim().toLowerCase();
+    if (normUpdates.plan) normUpdates.plan = normUpdates.plan.trim().toLowerCase();
+
+    const [updated] = await db
+      .update(subscriptions)
+      .set(normUpdates)
+      .where(eq(subscriptions.id, id))
+      .returning();
+    if (!updated) throw new Error("Subscription not found.");
+    return updated;
+  } catch (err: any) {
+    throw new Error(
+      err?.message && typeof err.message === "string"
+        ? `Database error: ${err.message}`
+        : "Failed to update subscription. Please check input data."
+    );
+  }
 }
