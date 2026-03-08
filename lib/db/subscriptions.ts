@@ -1,6 +1,6 @@
 import { db } from "./client";
 import { subscriptions } from "./schema";
-import { eq, ilike } from "drizzle-orm";
+import { eq, ilike, and } from "drizzle-orm";
 
 export type Subscription = typeof subscriptions.$inferSelect;
 
@@ -50,9 +50,11 @@ export async function createSubscription(subscription: {
     .select()
     .from(subscriptions)
     .where(
-      eq(subscriptions.email, subscription.email)
-        .and(eq(subscriptions.plan, subscription.plan))
-        .and(eq(subscriptions.status, subscription.status))
+      and(
+        eq(subscriptions.email, subscription.email),
+        eq(subscriptions.plan, subscription.plan),
+        eq(subscriptions.status, subscription.status)
+      )
     );
   if (exists.length > 0) throw new Error("Duplicate subscription record exists.");
 
