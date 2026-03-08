@@ -1,69 +1,50 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useTransition } from "react";
 
-// Demo/mock data
-const demoSubscriptions = [
-  {
-    id: "sub_5f9a",
-    customer: "Amelia Harper",
-    email: "amelia.harper@mail.com",
-    plan: "Pro",
-    status: "Active",
-    price: "$49",
-    nextRenewal: "2024-12-05",
-  },
-  {
-    id: "sub_3cde",
-    customer: "Samuel Martin",
-    email: "samuel.martin@mail.com",
-    plan: "Basic",
-    status: "Paused",
-    price: "$19",
-    nextRenewal: "2024-08-22",
-  },
-  {
-    id: "sub_783z",
-    customer: "Kim Lee",
-    email: "kim.lee@mail.com",
-    plan: "Enterprise",
-    status: "Active",
-    price: "$249",
-    nextRenewal: "2024-10-09",
-  },
-  {
-    id: "sub_92bf",
-    customer: "Priya Shah",
-    email: "priya.shah@mail.com",
-    plan: "Pro",
-    status: "Canceled",
-    price: "$49",
-    nextRenewal: "-",
-  },
-  {
-    id: "sub_85xt",
-    customer: "David Yuan",
-    email: "david.yuan@mail.com",
-    plan: "Pro",
-    status: "Active",
-    price: "$49",
-    nextRenewal: "2024-09-15",
-  },
-];
+// Define the shape (should match lib/db/subscriptions)
+type Subscription = {
+  id: string;
+  customer: string;
+  email: string;
+  plan: string;
+  status: string;
+  price: number;
+  nextRenewal: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export default function SubscriptionDemoPanel() {
   const [filter, setFilter] = useState("");
+  const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  // Filter subscriptions by customer name, plan, or status
-  const filtered = demoSubscriptions.filter((s) =>
-    [s.customer, s.plan, s.status].join(" ").toLowerCase().includes(filter.toLowerCase())
-  );
+  // Load subscriptions from server action API
+  async function fetchSubscriptions(query?: string) {
+    setLoading(true);
+    try {
+      const params = query ? `?search=${encodeURIComponent(query)}` : "";
+      const res = await fetch(`/api/subscriptions${params}`, { cache: "no-store" });
+      if (res.ok) {
+        const subs = await res.json();
+        setSubscriptions(subs);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  // Simulate loading for user experience
+  useEffect(() => {
+    fetchSubscriptions();
+  }, []);
+
+  // Search handler
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => setLoading(false), 400);
+    startTransition(() => {
+      fetchSubscriptions(filter);
+    });
   }
 
   return (
@@ -79,8 +60,9 @@ export default function SubscriptionDemoPanel() {
         <button
           type="submit"
           className="inline-flex items-center justify-center rounded bg-[#fb7232] px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#e06225]"
+          disabled={isPending || loading}
         >
-          Search
+          {isPending || loading ? "Searching…" : "Search"}
         </button>
       </form>
       <div className="overflow-x-auto font-mono">
@@ -97,14 +79,15 @@ export default function SubscriptionDemoPanel() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {loading && (
               <tr>
                 <td colSpan={7} className="py-8 text-center text-[#FB7232] font-bold">
                   Loading subscriptions…
                 </td>
               </tr>
-            ) : filtered.length > 0 ? (
-              filtered.map((sub) => (
+            )}
+            {!loading && subscriptions.length > 0 ? (
+              subscriptions.map((sub) => (
                 <tr key={sub.id}>
                   <td className="px-2 py-1 whitespace-nowrap">{sub.customer}</td>
                   <td className="px-2 py-1 whitespace-nowrap">{sub.email}</td>
@@ -112,20 +95,20 @@ export default function SubscriptionDemoPanel() {
                   <td className={`px-2 py-1 whitespace-nowrap font-bold ${sub.status === "Active" ? "text-green-700" : sub.status === "Paused" ? "text-yellow-600" : "text-red-600"}`}>
                     {sub.status}
                   </td>
-                  <td className="px-2 py-1 whitespace-nowrap">{sub.price}</td>
+                  <td className="px-2 py-1 whitespace-nowrap">${sub.price}</td>
                   <td className="px-2 py-1 whitespace-nowrap">{sub.nextRenewal}</td>
                   <td className="px-2 py-1 whitespace-nowrap">
                     <DemoActionButtons status={sub.status} />
                   </td>
                 </tr>
               ))
-            ) : (
+            ) : !loading ? (
               <tr>
                 <td colSpan={7} className="py-8 text-center italic text-zinc-400">
                   No subscriptions found.
                 </td>
               </tr>
-            )}
+            ) : null}
           </tbody>
         </table>
       </div>
